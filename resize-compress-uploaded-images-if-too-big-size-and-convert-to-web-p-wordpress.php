@@ -1,60 +1,66 @@
 <?php
 
-require ('vendor/autoload.php'); // Includi il file di autoloading per le dipendenze
+require ('vendor/autoload.php'); // Include the autoloading file for dependencies
 
-use WebPConvert\WebPConvert; // Importa la classe WebPConvert dalla libreria
+use WebPConvert\WebPConvert; // Import the WebPConvert class from the library
 
-add_filter('wp_handle_upload', 'compress_and_convert_images_to_webp'); // Aggiungi un filtro per l'upload di WordPress
+add_filter('wp_handle_upload', 'compress_and_convert_images_to_webp'); // Add a filter for WordPress file uploads
 
-function compress_and_convert_images_to_webp($file) {
-    // Controlla se il tipo di file è supportato
+/**
+ * Compresses and converts images to WebP format.
+ *
+ * @param array $file The file to be processed.
+ * @return array|string The processed file in WebP format or the original file if it's not supported.
+ */
+function compress_and_convert_images_to_webp(array $file): array|string {
+    // Check if the file type is supported
     $supported_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!in_array($file['type'], $supported_types)) {
-        return $file; // Se il tipo di file non è supportato, restituisci il file originale
+        return $file; // If the file type is not supported, return the original file
     }
 
-    // Ottieni il percorso alla directory di upload di WordPress
+    // Get the WordPress upload directory path
     $wp_upload_dir = wp_upload_dir();
 
-    // Imposta i percorsi dei file
-    $old_file_path = $file['file']; // Percorso del file originale
-    $file_name = basename($file['file']); // Nome del file
-    $webp_file_path = $wp_upload_dir['path'] . '/' . pathinfo($file_name, PATHINFO_FILENAME) . '.webp'; // Percorso del file WebP
+    // Set the file paths
+    $old_file_path = $file['file']; // Path of the original file
+    $file_name = basename($file['file']); // File name
+    $webp_file_path = $wp_upload_dir['path'] . '/' . pathinfo($file_name, PATHINFO_FILENAME) . '.webp'; // Path of the WebP file
 
-    // Controlla se il file è già un'immagine WebP
+    // Check if the file is already a WebP image
     if (pathinfo($old_file_path, PATHINFO_EXTENSION) === 'webp') {
-        return $file; // Se è già un'immagine WebP, restituisci il file originale
+        return $file; // If it's already a WebP image, return the original file
     }
 
-    // Controlla se esiste un'immagine con lo stesso nome
+    // Check if an image with the same name exists
     if (file_exists($webp_file_path)) {
-        // Se esiste, ottieni l'ID dell'allegato per il file WebP esistente
+        // If it exists, get the attachment ID for the existing WebP file
         $existing_attachment_id = attachment_url_to_postid($wp_upload_dir['url'] . '/' . basename($webp_file_path));
 
         if ($existing_attachment_id) {
-            // Elimina il vecchio file WebP
+            // Delete the old WebP file
             unlink($webp_file_path);
 
-            // Elimina l'entrata nel database per il vecchio file WebP
-            wp_delete_attachment($existing_attachment_id, true); // Imposta il secondo parametro su true per eliminare definitivamente l'allegato
+            // Delete the database entry for the old WebP file
+            wp_delete_attachment($existing_attachment_id, true); // Set the second parameter to true to permanently delete the attachment
         }
     }
 
-    // Imposta le opzioni per la conversione
+    // Set the options for the conversion
     $options = [
-        'quality' => 90, // Regola questo valore per controllare il livello di compressione
-        //'converters' => ['cwebp', 'gd', 'imagick'], // Convertitori da utilizzare
+        'quality' => 90, // Adjust this value to control the compression level
+        //'converters' => ['cwebp', 'gd', 'imagick'], // Converters to use
     ];
 
-    // Esegui la conversione in formato WebP
+    // Perform the conversion to WebP format
     WebPConvert::convert($old_file_path, $webp_file_path, $options);
 
-    // Verifica se la conversione è stata completata con successo
+    // Check if the conversion was successful
     if (file_exists($webp_file_path)) {
-        // Elimina il vecchio file immagine
+        // Delete the old image file
         unlink($old_file_path);
 
-        // Restituisci le informazioni aggiornate sul file
+        // Return the updated file information
         return [
             'file' => $webp_file_path,
             'url' => $wp_upload_dir['url'] . '/' . basename($webp_file_path),
