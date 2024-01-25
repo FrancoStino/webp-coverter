@@ -24,7 +24,7 @@ Per utilizzare questo plugin nel tuo sito WordPress, segui questi passaggi:
 3. **Aggiungi il Require nel `functions.php` del Child Theme:** Nel file `functions.php` del tuo child theme, inserisci la seguente linea di codice per includere il plugin:
 
    ```php
-   require ('functions/webp-coverter/resize-compress-uploaded-images-if-too-big-size-and-convert-to-web-p-wordpress.php');
+   require ('functions/webp-coverter/compress-and-convert-images-to-webp-format-in-wordpress.php');
    ```
 
 4. **Configurazione Opzionale:** Puoi personalizzare la qualità della conversione WebP regolando l'opzione `quality` nel codice del plugin, se necessario. Valori più alti offrono una migliore qualità ma dimensioni di file più grandi, mentre valori più bassi forniscono una maggiore compressione ma possono ridurre la qualità.
