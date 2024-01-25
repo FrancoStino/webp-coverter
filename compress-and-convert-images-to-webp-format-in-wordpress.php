@@ -42,7 +42,7 @@ class ImageConverter {
 
             return [
                 'file' => $webpFilePath,
-                'url' => $wpUploadDir['url'] . '/' . $webpFileName,
+                //'url' => $wpUploadDir['url'] . '/' . $webpFileName,
                 'type' => 'image/webp',
             ];
         }
